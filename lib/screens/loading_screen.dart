@@ -11,8 +11,8 @@ class LoadingScreen extends StatefulWidget {
 class _LoadingScreenState extends State<LoadingScreen> {
   Future<void> getLocation() async {
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium);
-        print(position);
+        desiredAccuracy: LocationAccuracy.high);
+    print(position);
   }
 
   @override
@@ -20,7 +20,27 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Scaffold(
       body: Center(
         child: ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
+            bool serviceEnabled;
+            LocationPermission permission;
+
+            serviceEnabled = await Geolocator.isLocationServiceEnabled();
+            if (!serviceEnabled) {
+              return Future.error('Location services are disabled');
+            }
+
+            permission = await Geolocator.checkPermission();
+            if (permission == LocationPermission.denied) {
+              permission = await Geolocator.requestPermission();
+              if (permission == LocationPermission.denied) {
+                return Future.error('Location permissions are denied');
+              }
+            }
+
+            if (permission == LocationPermission.deniedForever) {
+              return Future.error(
+                  'Location permissions are permanently denied, we cannot request permissions.');
+            }
             getLocation();
           },
           child: const Text('Get Location'),
