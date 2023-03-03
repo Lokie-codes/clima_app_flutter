@@ -1,3 +1,4 @@
+import 'package:clima_app_flutter/services/location.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,14 +12,12 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
   Future<void> getLocation() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    if (kDebugMode) {
-      print(position);
-    }
+    Location location = Location();
+    await location.getCurrentLocation();
   }
 
   Future<void> checkPermission() async {
+    
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -42,17 +41,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   @override
+  void initState() {
+    checkPermission();
+    getLocation();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () async {
-            checkPermission();
-            getLocation();
-          },
-          child: const Text('Get Location'),
-        ),
-      ),
-    );
+    return const Scaffold();
   }
 }
